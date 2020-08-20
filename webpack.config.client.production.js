@@ -11,11 +11,7 @@ const config = {
 		publicPath: "/dist/",
 	},
 	target: "node",
-	node: {
-		__dirname: false,
-		__filename: false,
-	},
-	externals: [nodeExternals()],
+
 	module: {
 		rules: [
 			{

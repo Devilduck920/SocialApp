@@ -1,45 +1,50 @@
-import express from "express";
-import path from "path";
-import bodyParser from "body-parser";
-import cookieParser from "cookie-parser";
-import compress from "compression";
-import cors from "cors";
-import helmet from "helmet";
-import Template from "./../template";
-import userRoutes from "./routes/user.routes";
-import authRoutes from "./routes/auth.routes";
-import React from "react";
-import ReactDOMServer from "react-dom/server";
-import MainRouter from "./../client/MainRouter";
-import { StaticRouter } from "react-router-dom";
-import { ServerStyleSheets, ThemeProvider } from "@material-ui/styles";
-import theme from "./../client/theme";
+import express from 'express'
+import path from 'path'
+import bodyParser from 'body-parser'
+import cookieParser from 'cookie-parser'
+import compress from 'compression'
+import cors from 'cors'
+import helmet from 'helmet'
+import Template from './../template'
+import userRoutes from './routes/user.routes'
+import authRoutes from './routes/auth.routes'
+import postRoutes from './routes/post.routes'
 
-//comment out before building for production v
-import devBundle from "./devBundle"; // comment before production
-//comment out before building for production ^
 
-const CURRENT_WORKING_DIR = process.cwd();
-const app = express();
+import React from 'react'
+import ReactDOMServer from 'react-dom/server'
+import MainRouter from './../client/MainRouter'
+import { StaticRouter } from 'react-router-dom'
+
+import { ServerStyleSheets, ThemeProvider } from '@material-ui/styles'
+import theme from './../client/theme'
+
 
 //comment out before building for production
-devBundle.compile(app);
+import devBundle from './devBundle'
 
-// parse body params and attache them to req.body
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser());
-app.use(compress());
-app.use(helmet());
-app.use(cors());
-app.use("/dist", express.static(path.join(CURRENT_WORKING_DIR, "dist")));
+const CURRENT_WORKING_DIR = process.cwd()
+const app = express()
 
-app.use("/", userRoutes);
-app.use("/", authRoutes);
+//comment out before building for production
+devBundle.compile(app)
 
-app.get("*", (req, res) => {
-	const sheets = new ServerStyleSheets();
-	const context = {};
+
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(cookieParser())
+app.use(compress())
+app.use(helmet())
+app.use(cors())
+app.use('/dist', express.static(path.join(CURRENT_WORKING_DIR, 'dist')))
+app.use('/', userRoutes)
+app.use('/', authRoutes)
+app.use('/', postRoutes)
+
+app.get('*', (req, res) => {
+	const sheets = new ServerStyleSheets()
+
+	const context = {}
 	const markup = ReactDOMServer.renderToString(
 		sheets.collect(
 			<StaticRouter location={req.url} context={context}>
@@ -48,27 +53,25 @@ app.get("*", (req, res) => {
 				</ThemeProvider>
 			</StaticRouter>
 		)
-	);
+	)
 	if (context.url) {
-		return res.redirect(303, context.url);
+		return res.redirect(303, context.url)
 	}
-	const css = sheets.toString();
-	res.status(200).send(
-		Template({
-			markup: markup,
-			css: css,
-		})
-	);
-});
+	const css = sheets.toString()
+	res.status(200).send(Template({
+		markup: markup,
+		css: css
+	}))
+})
 
 // Catch unauthorised errors
 app.use((err, req, res, next) => {
-	if (err.name === "UnauthorizedError") {
-		res.status(401).json({ error: err.name + ": " + err.message });
+	if (err.name === 'UnauthorizedError') {
+		res.status(401).json({ "error": err.name + ": " + err.message })
 	} else if (err) {
-		res.status(400).json({ error: err.name + ": " + err.message });
-		console.log(err);
+		res.status(400).json({ "error": err.name + ": " + err.message })
+		console.log(err)
 	}
-});
+})
 
-export default app;
+export default app
